@@ -7,6 +7,7 @@ const user = {
     name: '',
     avatar: '',
     roles: [],
+    info: {},
     permissions: []
   },
 
@@ -25,6 +26,9 @@ const user = {
     },
     SET_PERMISSIONS: (state, permissions) => {
       state.permissions = permissions
+    },
+    SET_INFO: (state, user) => {
+      state.info = user
     }
   },
 
@@ -58,6 +62,7 @@ const user = {
           } else {
             commit('SET_ROLES', ['ROLE_DEFAULT'])
           }
+          commit('SET_INFO', user)
           commit('SET_NAME', user.userName)
           commit('SET_AVATAR', avatar)
           resolve(res)
@@ -66,7 +71,7 @@ const user = {
         })
       })
     },
-    
+
     // 退出系统
     LogOut({ commit, state }) {
       return new Promise((resolve, reject) => {

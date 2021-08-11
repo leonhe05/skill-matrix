@@ -1,11 +1,17 @@
 package com.ruoyi.common.utils;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.exception.CustomException;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 安全服务工具类
@@ -14,14 +20,31 @@ import com.ruoyi.common.exception.CustomException;
  */
 public class SecurityUtils
 {
+    private static RestTemplate restTemplate;
+
     /**
-     * 获取用户账户
+     * 获取用户账户nwsId
      **/
     public static String getUsername()
     {
         try
         {
             return getLoginUser().getUsername();
+        }
+        catch (Exception e)
+        {
+            throw new CustomException("获取用户账户异常", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    /**
+     * 获取用户工号
+     **/
+    public static String getEeId()
+    {
+        try
+        {
+            return getLoginUser().getEmployee().getEeId();
         }
         catch (Exception e)
         {
@@ -80,11 +103,30 @@ public class SecurityUtils
     /**
      * 是否为管理员
      * 
-     * @param userId 用户ID
+     * @param roleId 用户ID
      * @return 结果
      */
-    public static boolean isAdmin(Long userId)
+    public static boolean isAdmin(Long roleId)
     {
-        return userId != null && 1L == userId;
+        return roleId != null && 1l == roleId;
+    }
+
+
+    /**
+     * 域登录验证
+     *
+     * @param nwsId 用户域账号ID, password 密码
+     * @return 结果
+     */
+    public static boolean nwsLogin(String nwsId, String password)
+    {
+        Map<String,String> uriVariables = new HashMap();
+        uriVariables.put("username",nwsId);
+        uriVariables.put("password",password);
+        if (StringUtils.isNull(restTemplate)){
+            restTemplate = new RestTemplate();
+        }
+        ResponseEntity<String> res = restTemplate.getForEntity("http://172.17.192.115:81/Service.asmx/ValidateUser?username={username}&password={password}", String.class, uriVariables);
+        return !res.getBody().contains("xsi:nil=\"true\"");
     }
 }

@@ -52,6 +52,14 @@ public interface SysUserRoleMapper
     public int deleteUserRoleInfo(SysUserRole userRole);
 
     /**
+     * 删除用户和角色关联信息
+     *
+     * @param eeId 用户和角色关联信息
+     * @return 结果
+     */
+    public int deleteUserRoleByEeId(String eeId);
+
+    /**
      * 批量取消授权用户角色
      * 
      * @param roleId 角色ID
@@ -59,4 +67,10 @@ public interface SysUserRoleMapper
      * @return 结果
      */
     public int deleteUserRoleInfos(@Param("roleId") Long roleId, @Param("userIds") Long[] userIds);
+
+    int insertUserRole(SysUserRole sysUserRole);
+
+    public SysUserRole selectRoleByEeId(String eeId);
+
+
 }

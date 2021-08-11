@@ -278,7 +278,7 @@ public class SysUserServiceImpl implements ISysUserService
     public void insertUserAuth(Long userId, Long[] roleIds)
     {
         userRoleMapper.deleteUserRoleByUserId(userId);
-        insertUserRole(userId, roleIds);
+        //insertUserRole(userId, roleIds);
     }
 
     /**
@@ -358,7 +358,7 @@ public class SysUserServiceImpl implements ISysUserService
             for (Long roleId : roles)
             {
                 SysUserRole ur = new SysUserRole();
-                ur.setUserId(user.getUserId());
+                ur.setEeId(user.getUserId().toString());
                 ur.setRoleId(roleId);
                 list.add(ur);
             }
@@ -398,10 +398,10 @@ public class SysUserServiceImpl implements ISysUserService
     /**
      * 新增用户角色信息
      * 
-     * @param userId 用户ID
+     * @param eeId 用户ID
      * @param roleIds 角色组
      */
-    public void insertUserRole(Long userId, Long[] roleIds)
+    public void insertUserRole(String eeId, Long[] roleIds)
     {
         if (StringUtils.isNotNull(roleIds))
         {
@@ -410,7 +410,7 @@ public class SysUserServiceImpl implements ISysUserService
             for (Long roleId : roleIds)
             {
                 SysUserRole ur = new SysUserRole();
-                ur.setUserId(userId);
+                ur.setEeId(eeId);
                 ur.setRoleId(roleId);
                 list.add(ur);
             }

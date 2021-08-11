@@ -144,6 +144,32 @@ export const constantRoutes = [
         meta: { title: '修改生成配置' }
       }
     ]
+  },
+  {
+    path: '/assign',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'competence/:positionId(\\d+)',
+        component: (resolve) => require(['@/views/talent/position/assignCompetence'], resolve),
+        name: 'AssignCompetence',
+        meta: { title: '分配技能'}
+      }
+    ]
+  },
+  {
+    path: '/assign',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'owner/:positionId(\\d+)',
+        component: (resolve) => require(['@/views/talent/position/assignOwner'], resolve),
+        name: 'AssignOwner',
+        meta: { title: '分配人员'}
+      }
+    ]
   }
 ]
 

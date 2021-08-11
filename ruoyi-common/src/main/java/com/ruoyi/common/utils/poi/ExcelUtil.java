@@ -8,15 +8,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
@@ -378,6 +370,78 @@ public class ExcelUtil<T>
                 {
                     fillExcelData(index, row);
                     addStatisticsRow();
+                }
+            }
+            String filename = encodingFilename(sheetName);
+            out = new FileOutputStream(getAbsoluteFile(filename));
+            wb.write(out);
+            return AjaxResult.success(filename);
+        }
+        catch (Exception e)
+        {
+            log.error("导出Excel异常{}", e.getMessage());
+            throw new CustomException("导出Excel失败，请联系网站管理员！");
+        }
+        finally
+        {
+            if (wb != null)
+            {
+                try
+                {
+                    wb.close();
+                }
+                catch (IOException e1)
+                {
+                    e1.printStackTrace();
+                }
+            }
+            if (out != null)
+            {
+                try
+                {
+                    out.close();
+                }
+                catch (IOException e1)
+                {
+                    e1.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * 动态列的导出
+     *
+     * @param
+     * @return
+     */
+    public AjaxResult exportDynamicColumn(List<LinkedHashMap<String,String>> data, String sheetName){
+        OutputStream out = null;
+        createWorkbook();
+        try
+        {
+            // 只有一个sheet.
+            double sheetNo = 0;
+            this.sheetName = sheetName;
+            createSheet(sheetNo, 0);
+            // 产生一行
+            Row row;
+            int column = 0;
+            int startNo = 0;
+            int endNo = data.size();
+            for (int i = startNo; i < endNo; i++)
+            {
+                column = 0;
+                row = sheet.createRow(i);
+                HashMap<String,String> dataItem = data.get(i);
+                for (String key : dataItem.keySet())
+                {
+                    // 创建数据格
+                    Cell cell = row.createCell(column++);
+                    // 写入信息
+                    cell.setCellValue(dataItem.get(key));
+                    if (i == 0)
+                        cell.setCellStyle(styles.get("header"));
                 }
             }
             String filename = encodingFilename(sheetName);
@@ -1097,4 +1161,5 @@ public class ExcelUtil<T>
         }
         return val;
     }
+
 }

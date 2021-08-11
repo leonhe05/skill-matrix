@@ -392,10 +392,27 @@ public class SysRoleServiceImpl implements ISysRoleService
         for (Long userId : userIds)
         {
             SysUserRole ur = new SysUserRole();
-            ur.setUserId(userId);
+            //ur.setUserId(userId);
             ur.setRoleId(roleId);
             list.add(ur);
         }
         return userRoleMapper.batchUserRole(list);
+    }
+
+    @Override
+    public int updateUserRole(SysUserRole sysUserRole)
+    {
+        userRoleMapper.deleteUserRoleByEeId(sysUserRole.getEeId());
+        return userRoleMapper.insertUserRole(sysUserRole);
+    }
+
+    /**
+     * 通过角色ID查询角色
+     *
+     * @param eeId 角色ID
+     * @return 角色对象信息
+     */
+    public SysUserRole selectRoleByEeId(String eeId){
+        return userRoleMapper.selectRoleByEeId(eeId);
     }
 }

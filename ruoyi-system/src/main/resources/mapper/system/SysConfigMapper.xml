@@ -18,7 +18,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     
     <sql id="selectConfigVo">
         select config_id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark 
-		from sys_config
+		from ts_sys_config
     </sql>
     
     <!-- 查询条件 -->
@@ -61,11 +61,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     
     <select id="checkConfigKeyUnique" parameterType="String" resultMap="SysConfigResult">
         <include refid="selectConfigVo"/>
-        where config_key = #{configKey} limit 1
+        where config_key = #{configKey} and rownum <![CDATA[ <= ]]> 1
     </select>
     
     <insert id="insertConfig" parameterType="SysConfig">
-        insert into sys_config (
+        insert into ts_sys_config (
 			<if test="configName != null and configName != '' ">config_name,</if>
 			<if test="configKey != null and configKey != '' ">config_key,</if>
 			<if test="configValue != null and configValue != '' ">config_value,</if>
@@ -80,12 +80,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="configType != null and configType != ''">#{configType},</if>
 			<if test="createBy != null and createBy != ''">#{createBy},</if>
 			<if test="remark != null and remark != ''">#{remark},</if>
- 			sysdate()
+ 			sysdate
 		)
     </insert>
 	 
     <update id="updateConfig" parameterType="SysConfig">
-        update sys_config 
+        update ts_sys_config 
         <set>
             <if test="configName != null and configName != ''">config_name = #{configName},</if>
             <if test="configKey != null and configKey != ''">config_key = #{configKey},</if>
@@ -93,17 +93,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="configType != null and configType != ''">config_type = #{configType},</if>
             <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
             <if test="remark != null">remark = #{remark},</if>
- 			update_time = sysdate()
+ 			update_time = sysdate
         </set>
         where config_id = #{configId}
     </update>
 	
     <delete id="deleteConfigById" parameterType="Long">
-        delete from sys_config where config_id = #{configId}
+        delete from ts_sys_config where config_id = #{configId}
     </delete>
     
     <delete id="deleteConfigByIds" parameterType="Long">
-        delete from sys_config where config_id in 
+        delete from ts_sys_config where config_id in 
         <foreach item="configId" collection="array" open="(" separator="," close=")">
         	#{configId}
         </foreach>

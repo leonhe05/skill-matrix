@@ -8,6 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.ruoyi.system.domain.SysUserRole;
+import com.ruoyi.system.mapper.SysUserRoleMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.common.constant.UserConstants;
@@ -39,6 +42,9 @@ public class SysMenuServiceImpl implements ISysMenuService
 
     @Autowired
     private SysRoleMapper roleMapper;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
 
     @Autowired
     private SysRoleMenuMapper roleMenuMapper;
@@ -102,20 +108,21 @@ public class SysMenuServiceImpl implements ISysMenuService
     /**
      * 根据用户ID查询菜单
      * 
-     * @param userId 用户名称
+     * @param eeId 用户名称
      * @return 菜单列表
      */
     @Override
-    public List<SysMenu> selectMenuTreeByUserId(Long userId)
+    public List<SysMenu> selectMenuTreeByUserId(String eeId)
     {
         List<SysMenu> menus = null;
-        if (SecurityUtils.isAdmin(userId))
+        SysUserRole sysUserRole = sysUserRoleMapper.selectRoleByEeId(eeId);
+        if (SecurityUtils.isAdmin(sysUserRole.getRoleId()))
         {
             menus = menuMapper.selectMenuTreeAll();
         }
         else
         {
-            menus = menuMapper.selectMenuTreeByUserId(userId);
+            menus = menuMapper.selectMenuTreeByUserId(eeId);
         }
         return getChildPerms(menus, 0);
     }

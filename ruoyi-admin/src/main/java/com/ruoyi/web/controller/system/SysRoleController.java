@@ -236,4 +236,20 @@ public class SysRoleController extends BaseController
     {
         return toAjax(roleService.insertAuthUsers(roleId, userIds));
     }
+
+    /**
+     * 批量选择用户授权
+     */
+    @GetMapping("/getUserRole")
+    public AjaxResult getUserRole(SysUserRole sysUserRole)
+    {
+        return AjaxResult.success(roleService.selectRoleByEeId(sysUserRole.getEeId()));
+    }
+
+    @PutMapping("/updateUserRole")
+    public AjaxResult updateUserRole(SysUserRole sysUserRole)
+    {
+        return toAjax(roleService.updateUserRole(sysUserRole));
+    }
+
 }

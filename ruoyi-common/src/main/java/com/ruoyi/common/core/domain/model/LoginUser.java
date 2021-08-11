@@ -2,6 +2,9 @@ package com.ruoyi.common.core.domain.model;
 
 import java.util.Collection;
 import java.util.Set;
+
+import com.ruoyi.common.core.domain.entity.Employee;
+import com.ruoyi.common.utils.SecurityUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -61,6 +64,12 @@ public class LoginUser implements UserDetails
      */
     private SysUser user;
 
+    /**
+     * 真用户信息，上面那个是ruoyi的
+     */
+    private Employee employee;
+
+
     public String getToken()
     {
         return token;
@@ -74,10 +83,18 @@ public class LoginUser implements UserDetails
     public LoginUser()
     {
     }
-
+    /*
+        即将淘汰
+     */
     public LoginUser(SysUser user, Set<String> permissions)
     {
         this.user = user;
+        this.permissions = permissions;
+    }
+
+    public LoginUser(Employee employee, Set<String> permissions)
+    {
+        this.employee = employee;
         this.permissions = permissions;
     }
 
@@ -85,13 +102,13 @@ public class LoginUser implements UserDetails
     @Override
     public String getPassword()
     {
-        return user.getPassword();
+        return SecurityUtils.encryptPassword("123456");
     }
 
     @Override
     public String getUsername()
     {
-        return user.getUserName();
+        return employee.getNwsId();
     }
 
     /**
@@ -218,6 +235,14 @@ public class LoginUser implements UserDetails
     public void setUser(SysUser user)
     {
         this.user = user;
+    }
+
+    public Employee getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
     @Override

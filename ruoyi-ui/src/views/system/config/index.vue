@@ -178,6 +178,7 @@
       </div>
     </el-dialog>
   </div>
+
 </template>
 
 <script>
@@ -187,6 +188,7 @@ export default {
   name: "Config",
   data() {
     return {
+      drawer: true,
       // 遮罩层
       loading: true,
       // 导出遮罩层

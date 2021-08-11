@@ -59,6 +59,15 @@ public interface ISysRoleService
      */
     public SysRole selectRoleById(Long roleId);
 
+
+    /**
+     * 通过角色ID查询角色
+     *
+     * @param eeId 角色ID
+     * @return 角色对象信息
+     */
+    public SysUserRole selectRoleByEeId(String eeId);
+
     /**
      * 校验角色名称是否唯一
      * 
@@ -163,4 +172,6 @@ public interface ISysRoleService
      * @return 结果
      */
     public int insertAuthUsers(Long roleId, Long[] userIds);
+
+    public int updateUserRole(SysUserRole sysUserRole);
 }

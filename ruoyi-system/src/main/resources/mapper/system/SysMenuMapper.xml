@@ -27,8 +27,8 @@
 	</resultMap>
 
 	<sql id="selectMenuVo">
-        select menu_id, menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, ifnull(perms,'') as perms, icon, create_time 
-		from sys_menu
+        select menu_id, menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, nvl(perms,'') as perms, icon, create_time 
+		from ts_sys_menu
     </sql>
     
     <select id="selectMenuList" parameterType="SysMenu" resultMap="SysMenuResult">
@@ -46,19 +46,19 @@
 		</where>
 		order by parent_id, order_num
 	</select>
-	
+
 	<select id="selectMenuTreeAll" resultMap="SysMenuResult">
-		select distinct m.menu_id, m.parent_id, m.menu_name, m.path, m.component, m.visible, m.status, ifnull(m.perms,'') as perms, m.is_frame, m.is_cache, m.menu_type, m.icon, m.order_num, m.create_time
-		from sys_menu m where m.menu_type in ('M', 'C') and m.status = 0
+		select distinct m.menu_id, m.parent_id, m.menu_name, m.path, m.component, m.visible, m.status, nvl(m.perms,'') as perms, m.is_frame, m.is_cache, m.menu_type, m.icon, m.order_num, m.create_time
+		from ts_sys_menu m where m.menu_type in ('M', 'C') and m.status = 0
 		order by m.parent_id, m.order_num
 	</select>
 	
 	<select id="selectMenuListByUserId" parameterType="SysMenu" resultMap="SysMenuResult">
-		select distinct m.menu_id, m.parent_id, m.menu_name, m.path, m.component, m.visible, m.status, ifnull(m.perms,'') as perms, m.is_frame, m.is_cache, m.menu_type, m.icon, m.order_num, m.create_time
-		from sys_menu m
-		left join sys_role_menu rm on m.menu_id = rm.menu_id
-		left join sys_user_role ur on rm.role_id = ur.role_id
-		left join sys_role ro on ur.role_id = ro.role_id
+		select distinct m.menu_id, m.parent_id, m.menu_name, m.path, m.component, m.visible, m.status, nvl(m.perms,'') as perms, m.is_frame, m.is_cache, m.menu_type, m.icon, m.order_num, m.create_time
+		from ts_sys_menu m
+		left join ts_sys_role_menu rm on m.menu_id = rm.menu_id
+		left join ts_sys_user_role ur on rm.role_id = ur.role_id
+		left join ts_sys_role ro on ur.role_id = ro.role_id
 		where ur.user_id = #{params.userId}
 		<if test="menuName != null and menuName != ''">
             AND menu_name like concat('%', #{menuName}, '%')
@@ -72,41 +72,40 @@
 		order by m.parent_id, m.order_num
 	</select>
     
-    <select id="selectMenuTreeByUserId" parameterType="Long" resultMap="SysMenuResult">
-		select distinct m.menu_id, m.parent_id, m.menu_name, m.path, m.component, m.visible, m.status, ifnull(m.perms,'') as perms, m.is_frame, m.is_cache, m.menu_type, m.icon, m.order_num, m.create_time
-		from sys_menu m
-			 left join sys_role_menu rm on m.menu_id = rm.menu_id
-			 left join sys_user_role ur on rm.role_id = ur.role_id
-			 left join sys_role ro on ur.role_id = ro.role_id
-			 left join sys_user u on ur.user_id = u.user_id
-		where u.user_id = #{userId} and m.menu_type in ('M', 'C') and m.status = 0  AND ro.status = 0
+    <select id="selectMenuTreeByUserId"  resultMap="SysMenuResult">
+		select distinct m.menu_id, m.parent_id, m.menu_name, m.path, m.component, m.visible, m.status, nvl(m.perms,'') as perms, m.is_frame, m.is_cache, m.menu_type, m.icon, m.order_num, m.create_time
+		from ts_sys_menu m
+		left join ts_sys_role_menu rm on m.menu_id = rm.menu_id
+		left join ts_sys_user_role ur on rm.role_id = ur.role_id
+		where ur.ee_id = #{eeId}
+		and m.menu_type in ('M', 'C') and m.status = 0
 		order by m.parent_id, m.order_num
 	</select>
 	
 	<select id="selectMenuListByRoleId" resultType="Integer">
 		select m.menu_id
-		from sys_menu m
-            left join sys_role_menu rm on m.menu_id = rm.menu_id
+		from ts_sys_menu m
+            left join ts_sys_role_menu rm on m.menu_id = rm.menu_id
         where rm.role_id = #{roleId}
             <if test="menuCheckStrictly">
-              and m.menu_id not in (select m.parent_id from sys_menu m inner join sys_role_menu rm on m.menu_id = rm.menu_id and rm.role_id = #{roleId})
+              and m.menu_id not in (select m.parent_id from ts_sys_menu m inner join ts_sys_role_menu rm on m.menu_id = rm.menu_id and rm.role_id = #{roleId})
             </if>
 		order by m.parent_id, m.order_num
 	</select>
 	
 	<select id="selectMenuPerms" resultType="String">
 		select distinct m.perms
-		from sys_menu m
-			 left join sys_role_menu rm on m.menu_id = rm.menu_id
-			 left join sys_user_role ur on rm.role_id = ur.role_id
+		from ts_sys_menu m
+			 left join ts_sys_role_menu rm on m.menu_id = rm.menu_id
+			 left join ts_sys_user_role ur on rm.role_id = ur.role_id
 	</select>
 
 	<select id="selectMenuPermsByUserId" parameterType="Long" resultType="String">
 		select distinct m.perms
-		from sys_menu m
-			 left join sys_role_menu rm on m.menu_id = rm.menu_id
-			 left join sys_user_role ur on rm.role_id = ur.role_id
-			 left join sys_role r on r.role_id = ur.role_id
+		from ts_sys_menu m
+			 left join ts_sys_role_menu rm on m.menu_id = rm.menu_id
+			 left join ts_sys_user_role ur on rm.role_id = ur.role_id
+			 left join ts_sys_role r on r.role_id = ur.role_id
 		where m.status = '0' and r.status = '0' and ur.user_id = #{userId}
 	</select>
 	
@@ -116,16 +115,16 @@
 	</select>
 	
 	<select id="hasChildByMenuId" resultType="Integer">
-	    select count(1) from sys_menu where parent_id = #{menuId}  
+	    select count(1) from ts_sys_menu where parent_id = #{menuId}  
 	</select>
 	
 	<select id="checkMenuNameUnique" parameterType="SysMenu" resultMap="SysMenuResult">
 		<include refid="selectMenuVo"/>
-		where menu_name=#{menuName} and parent_id = #{parentId} limit 1
+		where menu_name=#{menuName} and parent_id = #{parentId} and rownum <![CDATA[ <= ]]> 1
 	</select>
 	
 	<update id="updateMenu" parameterType="SysMenu">
-		update sys_menu
+		update ts_sys_menu
 		<set>
 			<if test="menuName != null and menuName != ''">menu_name = #{menuName},</if>
 			<if test="parentId != null">parent_id = #{parentId},</if>
@@ -141,13 +140,16 @@
 			<if test="icon !=null and icon != ''">icon = #{icon},</if>
 			<if test="remark != null and remark != ''">remark = #{remark},</if>
 			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
-			update_time = sysdate()
+			update_time = sysdate
 		</set>
 		where menu_id = #{menuId}
 	</update>
 
 	<insert id="insertMenu" parameterType="SysMenu">
-		insert into sys_menu(
+		<selectKey keyProperty="menuId" order="BEFORE" resultType="Long">
+			select seq_ts_sys_menu.nextval as menuId from DUAL
+		</selectKey>
+		insert into ts_sys_menu(
 		<if test="menuId != null and menuId != 0">menu_id,</if>
 		<if test="parentId != null and parentId != 0">parent_id,</if>
 		<if test="menuName != null and menuName != ''">menu_name,</if>
@@ -180,12 +182,12 @@
 		<if test="icon != null and icon != ''">#{icon},</if>
 		<if test="remark != null and remark != ''">#{remark},</if>
 		<if test="createBy != null and createBy != ''">#{createBy},</if>
-		sysdate()
+		sysdate
 		)
 	</insert>
 	
 	<delete id="deleteMenuById" parameterType="Long">
-	    delete from sys_menu where menu_id = #{menuId}
+	    delete from ts_sys_menu where menu_id = #{menuId}
 	</delete>
 
 </mapper> 

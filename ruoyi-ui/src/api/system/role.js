@@ -118,3 +118,20 @@ export function authUserSelectAll(data) {
     params: data
   })
 }
+
+//
+export function getUserRole(query) {
+  return request({
+    url: '/system/role/getUserRole',
+    method: 'get',
+    params: query
+  })
+}
+
+export function updateUserRole(data) {
+  return request({
+    url: '/system/role/updateUserRole',
+    method: 'put',
+    params: data
+  })
+}
