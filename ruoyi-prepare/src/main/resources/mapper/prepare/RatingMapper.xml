@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.prepare.mapper.RatingMapper">
+
+    <resultMap type="Rating" id="RatingResult">
+        <result property="eeId"          column="EE_ID"      />
+        <result property="chiName"          column="chi_name"      />
+        <result property="engName"          column="eng_name"      />
+        <result property="competenceId"  column="COMPETENCE_ID"    />
+        <result property="rating"        column="RATING"     />
+        <result property="lastRating"        column="LAST_RATING"     />
+        <result property="expectRating"  column="EXPECT_RATING"   />
+        <result property="archiveRating" column="ARCHIVE_RATING"   />
+        <result property="archiveDate"   column="ARCHIVE_DATE"    />
+        <result property="createBy"      column="create_by"      />
+        <result property="createTime"    column="create_DATE"    />
+        <result property="updateBy"      column="update_by"      />
+        <result property="updateTime"    column="update_DATE"    />
+    </resultMap>
+
+
+    <sql id="selectRating">
+        select
+            POSITION_ID, TPM.EE_ID,TSU.chi_name,TSU.eng_Name, TPM.OWNER,
+            TR.COMPETENCE_ID,TR.RATING,TR.LAST_RATING,
+            TR.CREATE_BY,TR.CREATE_DATE,TR.update_by,TR.update_DATE
+        from ts_POSITION_EMPLOYEE TPM
+        LEFT JOIN TS_RATING TR ON TR.EE_ID = TPM.EE_ID
+        left join TS_SYS_USER TSU on TPM.EE_ID = TSU.ee_id
+    </sql>
+
+
+    <select id="selectRatingByPosition" parameterType="Position" resultMap="RatingResult">
+        <include refid="selectRating"/>
+        <where>
+            TPM.position_id = #{positionId}
+            ORDER BY TSU.EE_ID
+        </where>
+    </select>
+
+    <update id="updateRating" parameterType="Rating">
+        update ts_rating
+        <set>
+            <if test="rating != null and rating != ''">rating = #{rating},</if>
+            last_rating = rating,
+            <if test="expectRating != null and expectRating != ''">EXPECT_RATING = #{expectRating},</if>
+            <if test="archiveRating != null and archiveRating != ''">ARCHIVE_RATING = #{archiveRating},</if>
+            <if test="archiveDate != null and archiveDate != ''">ARCHIVE_DATE = #{archiveDate},</if>
+            update_by = #{updateBy},
+            update_date = sysdate
+        </set>
+        where ee_id = #{eeId} and competence_id = #{competenceId}
+    </update>
+
+    <insert id="insertRating" parameterType="Rating">
+        insert into ts_rating(
+            <if test="eeId != null and eeId != ''">ee_id,</if>
+            <if test="competenceId != null and competenceId != ''">competence_id,</if>
+            <if test="rating != null and rating != ''">rating,</if>
+            <if test="expectRating != null and expectRating != ''">EXPECT_RATING,</if>
+            <if test="archiveRating != null and archiveRating != ''">ARCHIVE_RATING,</if>
+            <if test="archiveDate != null and archiveDate != ''">ARCHIVE_DATE,</if>
+            <if test="createBy != null">CREATE_BY,</if>
+            CREATE_DATE
+        ) values(
+            <if test="eeId != null and eeId != ''">#{eeId},</if>
+            <if test="competenceId != null and competenceId != ''">#{competenceId},</if>
+            <if test="rating != null and rating != ''">#{rating},</if>
+            <if test="expectRating != null and expectRating != ''">#{expectRating},</if>
+            <if test="archiveRating != null and archiveRating != ''">#{archiveRating},</if>
+            <if test="archiveDate != null and archiveDate != ''">#{archiveDate},</if>
+            <if test="createBy != null">#{createBy},</if>
+            sysdate
+        )
+    </insert>
+
+    <delete id="deleteRatingByPath">
+        delete from ts_rating where competence_id in (select competence_id from ts_competence  where path like #{path} || '%')
+    </delete>
+
+</mapper>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.prepare.mapper.EmployeeMapper">
+
+    <sql id="selectEmployee">
+        select
+        ee_id eeId, chi_name chiName, eng_name engName, short_name shortName,
+        GRADE grade,GENDER gender,join_date joinDate,DEPARTMENT department,SECTION section,
+        SUBSECTION subsection,MINI_COMPANY miniCompany,POSITION position,
+        SKILL_GRADE skillGrade,ON_JOB onJob,NWS_ID nwsId, ENABLE_LOGIN enableLogin,
+        CREATE_BY createBy,CREATE_TIME createTime,UPDATE_BY updateBy,UPDATE_TIME updateTime
+        from ts_sys_user
+    </sql>
+
+    <select id="getEmployeeList" resultType="Employee">
+        <include refid="selectEmployee"/>
+        <where> 1 = 1
+            <if test="eeId != null and eeId != ''">
+                AND EE_ID like '%' || #{eeId} || '%'
+            </if>
+            <if test="chiName != null and chiName != ''">
+                AND CHI_NAME like '%' || #{chiName} || '%'
+            </if>
+            <if test="engName != null and engName != ''">
+                AND ENG_NAME like '%' || #{engName} || '%'
+            </if>
+            <if test="nwsId != null and nwsId != ''">
+                AND lower(NWS_ID) = lower(#{nwsId})
+            </if>
+        </where>
+    </select>
+
+    <select id="getEmployeeByEeId" resultType="Employee">
+        <include refid="selectEmployee"/>
+        <where>
+             EE_ID = #{eeId}
+        </where>
+    </select>
+
+    <delete id="deleteEmployee" parameterType="Employee" >
+        delete from ts_sys_user where ee_id =  #{eeId}
+    </delete>
+
+    <update id="updateEmployee" parameterType="Employee" >
+        update ts_sys_user
+        <set>
+            <if test="chiName != null and chiName != ''">chi_name = #{chiName},</if>
+            <if test="engName != null and engName != ''">eng_name = #{engName},</if>
+            <if test="shortName != null and shortName != ''">short_name = #{shortName},</if>
+            <if test="grade != null and grade != ''">grade = #{grade},</if>
+            <if test="gender != null and gender != ''">gender = #{gender},</if>
+            <if test="joinDate != null and joinDate != ''">join_date = #{joinDate},</if>
+            <if test="department != null and department != ''">department = #{department},</if>
+            <if test="section != null and section != ''">section = #{section},</if>
+            <if test="subsection != null and subsection != ''">subsection = #{subsection},</if>
+            <if test="miniCompany != null and miniCompany != ''">MINI_COMPANY = #{miniCompany},</if>
+            <if test="position != null and position != ''">position = #{position},</if>
+            <if test="skillGrade != null and skillGrade != ''">skill_grade = #{skillGrade},</if>
+            <if test="onJob != null and onJob != ''">on_job = #{onJob},</if>
+            <if test="nwsId != null and nwsId != ''">nws_id = #{nwsId},</if>
+            <if test="enableLogin != null and enableLogin != ''">enable_login = #{enableLogin},</if>
+            update_by = #{updateBy},
+            update_time = sysdate
+        </set>
+        where ee_Id = #{eeId}
+    </update>
+
+    <insert id="insertEmployee" parameterType="Employee" >
+        insert into ts_sys_user (
+        ee_id,
+        <if test="chiName != null and chiName != ''">chi_name,</if>
+        <if test="engName != null and engName != ''">eng_name,</if>
+        <if test="shortName != null and shortName != ''">short_name,</if>
+        <if test="grade != null and grade != ''">grade,</if>
+        <if test="gender != null and gender != ''">gender,</if>
+        <if test="joinDate != null and joinDate != ''">join_date,</if>
+        <if test="department != null and department != ''">department,</if>
+        <if test="section != null and section != ''">section,</if>
+        <if test="subsection != null and subsection != ''">subsection,</if>
+        <if test="miniCompany != null and miniCompany != ''">mini_company,</if>
+        <if test="position != null and position != ''">position,</if>
+        <if test="skillGrade != null and skillGrade != ''">skill_grade,</if>
+        <if test="onJob != null and onJob != ''">on_job,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        <if test="updateTime != null and updateTime != ''">update_time,</if>
+        <if test="nwsId != null and nwsId != ''">nws_id,</if>
+        <if test="enableLogin != null and enableLogin != ''">enable_login,</if>
+        create_by,
+        create_time
+        )values(
+        #{eeId},
+        <if test="chiName != null and chiName != ''">#{chiName},</if>
+        <if test="engName != null and engName != ''">#{engName},</if>
+        <if test="shortName != null and shortName != ''">#{shortName},</if>
+        <if test="grade != null and grade != ''">#{grade},</if>
+        <if test="gender != null and gender != ''">#{gender},</if>
+        <if test="joinDate != null and joinDate != ''">#{joinDate},</if>
+        <if test="department != null and department != ''">#{department},</if>
+        <if test="section != null and section != ''">#{section},</if>
+        <if test="subsection != null and subsection != ''">#{subsection},</if>
+        <if test="miniCompany != null and miniCompany != ''">#{miniCompany},</if>
+        <if test="position != null and position != ''">#{position},</if>
+        <if test="skillGrade != null and skillGrade != ''">#{skillGrade},</if>
+        <if test="onJob != null and onJob != ''">#{onJob},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        <if test="updateTime != null and updateTime != ''">#{updateTime},</if>
+        <if test="nwsI d != null and nwsId != ''">#{nwsId},</if>
+        <if test="enableLogin != null and enableLogin != ''">#{enableLogin},</if>
+        #{createBy},
+        sysdate
+        )
+    </insert>
+
+
+</mapper>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.prepare.mapper.CompetenceMapper">
+
+    <resultMap type="Competence" id="CompetenceResult">
+        <id     property="competenceId"  column="competence_id"      />
+        <result property="cLabel"        column="c_label"    />
+        <result property="eLabel"        column="e_label"     />
+        <result property="parentId"      column="parent_id"   />
+        <result property="parentName"    column="parent_Name"   />
+        <result property="scorePlan"     column="score_plan"    />
+        <result property="path"          column="path"    />
+        <result property="disable"       column="disable"    />
+        <result property="flagTag"       column="flag_tag"    />
+        <result property="createBy"      column="create_by"      />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"      column="update_by"      />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"        column="remark"    />
+    </resultMap>
+
+    <sql id="selectCompetence">
+        select ts.competence_id, ts.c_label, ts.e_label, ts.parent_id, ts.path, ts.score_plan, ts.disable, ts.flag_tag, ts.create_by, ts.create_time, ts.update_by, ts.update_time, ts.remark, ts1.c_label parent_Name
+        from ts_competence ts
+        left join ts_competence ts1 on ts.parent_id = ts1.competence_id
+    </sql>
+
+
+    <select id="selectCompetenceList" parameterType="Competence" resultMap="CompetenceResult">
+        <include refid="selectCompetence"/>
+        <where>
+            <if test="competenceId != null and competenceId != ''">
+                AND ts.competence_id = #{competenceId}
+            </if>
+            <if test="cLabel != null and cLabel != ''">
+                AND ts.c_label like '%'||#{cLabel}||'%'
+            </if>
+            <if test="eLabel != null and eLabel != ''">
+                AND ts.e_label like '%'||#{eLabel}||'%'
+            </if>
+            <if test="path != null and path != ''">
+                AND ts.path like #{path}
+            </if>
+            <if test="parentId == 0 or (parentId != null and parentId != '')">
+                AND ts.parent_id = #{parentId}
+            </if>
+            and ts.flag_tag = '1'
+            order by ts.competence_Id
+        </where>
+    </select>
+
+    <select id="selectCompetenceListByPosition" parameterType="Position" resultMap="CompetenceResult">
+        <include refid="selectCompetence"/>,
+        ts_position_competence tpc
+        <where>
+            tpc.COMPETENCE_ID = ts.competence_id
+            and tpc.position_id = #{positionId}
+            and ts.flag_tag = '1'
+        </where>
+    </select>
+
+    <insert id="insertCompetence" parameterType="Competence">
+        <selectKey keyProperty="competenceId" resultType="long" order="BEFORE">
+            SELECT SEQ_TS_COMPETENCE.NEXTVAL as competenceId FROM DUAL
+        </selectKey>
+        insert into ts_competence (
+        competence_Id,
+        c_label,
+        e_label,
+        parent_id,
+        <if test="path != null and path != ''">path,</if>
+        <if test="scorePlan != null and scorePlan != ''">score_plan,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        create_by,
+        create_time
+        )values(
+        #{competenceId},
+        #{cLabel},
+        #{eLabel},
+        NVL(#{parentId,jdbcType=INTEGER}, '0'),
+        <if test="path != null and path != ''">#{path},</if>
+        <if test="scorePlan != null and scorePlan != ''">#{scorePlan},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        #{createBy},
+        sysdate
+        )
+    </insert>
+
+    <update id="updateCompetence" parameterType="Competence">
+        update ts_competence
+        <set>
+            <if test="cLabel != null and cLabel != ''">c_label = #{cLabel},</if>
+            <if test="eLabel != null and eLabel != ''">e_label = #{eLabel},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="path != null">path = #{path},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="disable != null">disable = #{disable},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate
+        </set>
+        where competence_id = #{competenceId}
+    </update>
+
+    <delete id="deleteCompetenceByPath">
+        delete from ts_competence
+        where path like #{path} || '%'
+    </delete>
+</mapper>

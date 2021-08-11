@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.prepare.mapper.PositionMapper">
+
+    <resultMap type="Position" id="PositionResult">
+        <id     property="positionId"  column="position_id"      />
+        <result property="cLabel"        column="c_label"    />
+        <result property="eLabel"        column="e_label"     />
+        <result property="parentId"      column="parent_id"   />
+        <result property="parentName"    column="parent_Name"   />
+        <result property="path"          column="path"    />
+        <result property="disable"       column="disable"    />
+        <result property="flagTag"       column="flag_tag"    />
+        <result property="createBy"      column="create_by"      />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"      column="update_by"      />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"        column="remark"    />
+    </resultMap>
+
+
+    <sql id="selectPosition">
+        select
+            ts.position_id, ts.c_label, ts.e_label, ts.parent_id, ts.path, ts.disable,
+            ts.flag_tag, ts.create_by, ts.create_time, ts.update_by, ts.update_time, ts.remark,
+            ts1.c_label parent_Name
+        from ts_position ts left join ts_position ts1 on ts.parent_id = ts1.position_id
+    </sql>
+
+
+    <select id="selectPositionList" parameterType="Position" resultMap="PositionResult">
+        <include refid="selectPosition"/>
+        <where>
+            <if test="positionId != null and positionId != ''">
+                AND ts.position_id = #{positionId}
+            </if>
+            <if test="cLabel != null and cLabel != ''">
+                AND ts.c_label like '%'||#{cLabel}||'%'
+            </if>
+            <if test="eLabel != null and eLabel != ''">
+                AND ts.e_label like '%'||#{eLabel}||'%'
+            </if>
+            <if test="parentId == 0 or (parentId != null and parentId != '')">
+                AND ts.parent_id = #{parentId}
+            </if>
+            and ts.flag_tag = '1'
+            order by ts.position_Id
+        </where>
+    </select>
+
+    <select id="selectPositionByIds" parameterType="String" resultMap="PositionResult">
+        <include refid="selectPosition"/>
+        <where>
+            ts.position_Id in
+            <foreach collection="collection" item="positionId" open="(" separator="," close=")">
+                #{positionId}
+            </foreach>
+            and ts.flag_tag = '1'
+            order by ts.position_Id
+        </where>
+    </select>
+
+    <select id="selectPositionListByEeId" resultMap="PositionResult">
+        select
+        ts.position_id, ts.c_label, ts.e_label, ts.parent_id, ts.path, ts.disable,
+        ts.flag_tag, ts.create_by, ts.create_time, ts.update_by, ts.update_time, ts.remark,
+        ts1.c_label parent_Name
+        from ts_position ts left join ts_position ts1 on ts.parent_id = ts1.position_id, ts_position_employee tpm
+        where tpm.position_id = ts.position_id
+        and tpm.ee_id = #{eeId}
+    </select>
+
+    <insert id="insertPosition" parameterType="Position">
+        <selectKey keyProperty="positionId" resultType="long" order="BEFORE">
+            SELECT SEQ_TS_POSITION.NEXTVAL as positionId FROM DUAL
+        </selectKey>
+        insert into ts_position (
+        position_Id,
+        c_label,
+        e_label,
+        parent_id,
+        <if test="path != null and path != ''">path,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        create_by,
+        create_time
+        )values(
+        #{positionId},
+        #{cLabel},
+        #{eLabel},
+        NVL(#{parentId,jdbcType=INTEGER}, '0'),
+        <if test="path != null and path != ''">#{path},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        #{createBy},
+        sysdate
+        )
+    </insert>
+
+    <insert id="insertPositionCompetence" parameterType="long">
+        insert into ts_position_competence (
+            position_id,
+            competence_id
+        )values(
+            #{positionId},
+            #{competenceId}
+        )
+    </insert>
+
+    <delete id="deletePositionCompetence" parameterType="Position">
+        delete from ts_position_competence where position_id = #{positionId}
+    </delete>
+
+    <delete id="deletePositionCompetenceByPath">
+        delete from ts_position_competence where competence_id in (select competence_id from ts_competence  where path like #{path} || '%')
+    </delete>
+
+    <update id="updatePosition" parameterType="Position">
+        update ts_position
+        <set>
+            <if test="cLabel != null and cLabel != ''">c_label = #{cLabel},</if>
+            <if test="eLabel != null and eLabel != ''">e_label = #{eLabel},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="path != null">path = #{path},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="disable != null">disable = #{disable},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate
+        </set>
+        where position_id = #{positionId}
+    </update>
+
+    <update id="deletePositionByPath" parameterType="Long">
+        update ts_position
+        <set>
+            flag_tag = '0'
+        </set>
+        where path like #{path} || '%'
+    </update>
+
+    <insert id="insertPositionEmployee" parameterType="positionEmployee">
+        insert into TS_POSITION_EMPLOYEE VALUES(#{positionId},#{eeId},#{owner})
+    </insert>
+
+    <delete id="deletePositionEmployee" parameterType="positionEmployee">
+        delete from TS_POSITION_EMPLOYEE where position_id = #{positionId} and ee_id = #{eeId}
+    </delete>
+
+    <select id="listPositionEmployee" parameterType="PositionEmployee" resultType="PositionEmployeeVo">
+        select tss.ee_id eeId, tss.eng_name engName, tss.chi_name chiName, tpm.OWNER owner
+        from TS_POSITION_EMPLOYEE tpm, ts_sys_user tss
+        where tpm.ee_id = tss.ee_id
+        and tpm.POSITION_ID = #{positionId}
+        ORDER BY OWNER DESC,tss.EE_ID
+    </select>
+
+    <update id="updatePositionEmployee" parameterType="PositionEmployee">
+        update TS_POSITION_EMPLOYEE set owner = #{owner} where ee_Id = #{eeId} and position_Id = #{positionId}
+    </update>
+
+    <select id="checkIsOwner"  resultType="int">
+        select owner from ts_position_employee
+        where position_id = #{positionId} and ee_id = #{eeId}
+    </select>
+</mapper>
